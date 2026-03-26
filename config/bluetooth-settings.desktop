@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Bluetooth Settings
+Comment=Pair and manage Bluetooth devices (controllers, audio, etc.)
+Exec=gnome-control-center bluetooth
+Icon=bluetooth
+Terminal=false
+Categories=Settings;
