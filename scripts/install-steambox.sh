@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Steambox: Ubuntu 24.04 Desktop — Steam-focused setup (auto-login, Steam autostart, Bluetooth).
+# Steambox: Ubuntu 24.04 Desktop — Steam-focused setup (auto-login, Steam autostart, Bluetooth, NVIDIA).
 # Run as root: sudo ./install-steambox.sh <username>
+# Optional: STEAMBOX_SKIP_NVIDIA=1 to skip GPU drivers; STEAMBOX_FORCE_NVIDIA=1 to install even if lspci sees no NVIDIA.
 set -euo pipefail
 
 STEAMBOX_USER="${1:-${STEAMBOX_USER:-}}"
@@ -38,7 +39,21 @@ apt-get install -y \
   bluez \
   gnome-bluetooth \
   gnome-control-center \
-  curl
+  curl \
+  ubuntu-drivers-common
+
+# NVIDIA proprietary “Game Ready” stack (Ubuntu restricted repo): RTX 50‑series (Blackwell) needs a recent branch;
+# Noble ships this as nvidia-driver-580 (consumer GeForce metapackage, not the -server / -open variants).
+if [[ "${STEAMBOX_SKIP_NVIDIA:-}" != "1" ]]; then
+  # Match consumer NVIDIA GPUs (vendor ID 10de) or the string "NVIDIA" in lspci output.
+  if [[ "${STEAMBOX_FORCE_NVIDIA:-}" == "1" ]] \
+    || lspci -nn 2>/dev/null | grep -qiE 'nvidia|\[10de:'; then
+    apt-get install -y nvidia-driver-580
+  else
+    echo "Steambox: no NVIDIA GPU detected (see lspci). Skipping nvidia-driver-580." >&2
+    echo "  Re-run with: STEAMBOX_FORCE_NVIDIA=1 $0 ${STEAMBOX_USER}" >&2
+  fi
+fi
 
 # GDM automatic login (handles default commented lines on Ubuntu)
 GDM_CONF="/etc/gdm3/custom.conf"

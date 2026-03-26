@@ -1,6 +1,6 @@
 # Steambox
 
-Ubuntu 24.04 **Desktop** tuned as a **Steam-first PC**: automatic login, Steam at session start, and easy Bluetooth pairing for controllers and headsets.
+Ubuntu 24.04 **Desktop** tuned as a **Steam-first PC**: automatic login, Steam at session start, **NVIDIA proprietary drivers** suitable for recent GeForce/RTX GPUs (including RTX 50‑series on Noble’s current stack), and easy Bluetooth pairing for controllers and headsets.
 
 ## Requirements
 
@@ -35,6 +35,15 @@ After reboot, GDM signs in that user without a password prompt, Steam starts wit
 | **Auto-login** | Sets `AutomaticLoginEnable` and `AutomaticLogin` in `/etc/gdm3/custom.conf` for the user you pass to the script. A timestamped backup of the previous file is kept next to it. |
 | **Steam on login** | Installs `steam-installer` and drops a system-wide autostart file in `/etc/xdg/autostart/` so Steam launches for every graphical session. |
 | **Bluetooth pairing** | Installs `bluez`, `gnome-bluetooth`, and `gnome-control-center`, enables the `bluetooth` service, adds a **Bluetooth Settings** shortcut on the user’s Desktop, and installs `/usr/local/bin/pair-bluetooth` (same as opening GNOME Bluetooth settings). |
+| **NVIDIA (Game Ready stack)** | If `lspci` shows an NVIDIA GPU, installs **`nvidia-driver-580`** from Ubuntu’s **restricted** repository (consumer GeForce metapackage aligned with NVIDIA’s current Linux branch on 24.04). This is the same driver family Ubuntu labels for gaming desktops, not the `-server` variants. |
+
+### NVIDIA install behavior
+
+- **Detection:** The script installs drivers when `lspci` reports NVIDIA hardware (`NVIDIA` or PCI vendor `10de`).
+- **No card seen (e.g. VM or install before GPU seated):** run again with `STEAMBOX_FORCE_NVIDIA=1` so the packages are installed anyway.
+- **Skip entirely:** `STEAMBOX_SKIP_NVIDIA=1` (e.g. AMD-only box).
+
+After install, reboot once so the kernel module loads. Verify with `nvidia-smi` if the package is present.
 
 ## Pairing Bluetooth devices
 
